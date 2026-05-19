@@ -61,6 +61,10 @@
   .row-adset:hover { background: #f0f4ff; }
   .row-creative { background: #fff; }
   .row-type { background: #fcfdff; color: #6b7280; font-size: 11.5px; }
+  .row-time { background: #1f2330; color: #fff; font-weight: 700; }
+  .row-time:hover { background: #374151; }
+  .row-time .toggle { color: #d1d5db; }
+  .row-time td { border-color: #374151; }
   .toggle {
     display: inline-block; width: 16px; text-align: center; cursor: pointer;
     color: #6b7280; user-select: none; font-size: 10px;
@@ -197,6 +201,13 @@
         <span style="color:#9ca3af;">~</span>
         <input type="date" id="dateTo" class="date-input">
         <span class="chip" id="dateReset" title="전체 기간으로 초기화">↺</span>
+      </span>
+      <span id="groupWrap" class="hidden" style="display:flex; gap:6px; align-items:center; margin-left:16px;">
+        <span class="label">그룹</span>
+        <span class="chip active" data-time="none">없음</span>
+        <span class="chip" data-time="daily">일별</span>
+        <span class="chip" data-time="weekly">주별</span>
+        <span class="chip" data-time="monthly">월별</span>
       </span>
       <button class="export-btn" id="exportBtn">CSV로 내보내기</button>
     </div>
@@ -342,10 +353,32 @@ let expanded = new Set();
 let dailyMode = false;
 let allDates = [];
 let dateFrom = '', dateTo = '';
+let timeGroup = 'none'; // 'none' | 'daily' | 'weekly' | 'monthly'
 
 /* ============ Build pivot tree ============ */
+function getWeekKey(dateStr) {
+  // Returns Monday of the ISO week containing dateStr, as YYYY-MM-DD
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+function getTimeKey(dateStr) {
+  if (!dateStr) return '';
+  if (timeGroup === 'daily')   return dateStr;
+  if (timeGroup === 'monthly') return dateStr.slice(0, 7);
+  if (timeGroup === 'weekly')  return getWeekKey(dateStr);
+  return '';
+}
+function formatTimeLabel(key) {
+  if (timeGroup === 'monthly') return key + ' (월)';
+  if (timeGroup === 'weekly')  return key + ' 주';
+  return key;
+}
 function buildTree(rows) {
   const tree = { name: 'ROOT', agg: emptyAgg(), children: {} };
+  const useTime = timeGroup !== 'none' && dailyMode;
   for (const r of rows) {
     if (statusFilter !== 'all' && r.status !== statusFilter) continue;
     if (r.spend < minSpend) continue;
@@ -353,9 +386,22 @@ function buildTree(rows) {
       if (dateFrom && r.date < dateFrom) continue;
       if (dateTo && r.date > dateTo) continue;
     }
+    // Optional L0: time bucket
+    let parent = tree;
+    if (useTime && r.date) {
+      const tk = getTimeKey(r.date);
+      let timeNode = tree.children[tk];
+      if (!timeNode) timeNode = tree.children[tk] = {
+        name: tk, label: formatTimeLabel(tk), level: 'time',
+        agg: emptyAgg(), children: {}, statuses: {}
+      };
+      addRow(timeNode.agg, r);
+      timeNode.statuses[r.status] = (timeNode.statuses[r.status] || 0) + 1;
+      parent = timeNode;
+    }
     // L1: campaign
-    let c = tree.children[r.campaign];
-    if (!c) c = tree.children[r.campaign] = { name: r.campaign, level: 'campaign', agg: emptyAgg(), children: {}, statuses: {} };
+    let c = parent.children[r.campaign];
+    if (!c) c = parent.children[r.campaign] = { name: r.campaign, level: 'campaign', agg: emptyAgg(), children: {}, statuses: {} };
     addRow(c.agg, r); c.statuses[r.status] = (c.statuses[r.status] || 0) + 1;
     // L2: adset
     let s = c.children[r.adset];
@@ -377,6 +423,11 @@ function buildTree(rows) {
 /* ============ Sort children ============ */
 function sortedChildren(node) {
   const arr = Object.values(node.children || {});
+  // Time-level children always sort chronologically ascending (oldest → newest)
+  if (arr.length && arr[0].level === 'time') {
+    arr.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+    return arr;
+  }
   arr.sort((a, b) => {
     const ad = derive(a.agg)[sortKey], bd = derive(b.agg)[sortKey];
     const av = isFinite(ad) ? ad : -Infinity;
@@ -508,6 +559,8 @@ function renderRow(node, depth, path) {
     nameHTML = `<span class="badge-type">${escapeHtml(node.name)}</span>`;
   } else if (node.level === 'creative') {
     nameHTML = escapeHtml(node.name) + ' ' + statusBadge(node) + suggestionBadges(node);
+  } else if (node.level === 'time') {
+    nameHTML = `📅 <strong>${escapeHtml(node.label || node.name)}</strong>`;
   } else {
     nameHTML = `<strong>${escapeHtml(node.name)}</strong> ` + statusBadge(node) + suggestionBadges(node);
   }
@@ -644,8 +697,10 @@ function render() {
   document.getElementById('notice').classList.toggle('hidden', dailyMode);
   document.getElementById('chartCard').classList.toggle('hidden', !dailyMode);
   document.getElementById('dateFilterWrap').classList.toggle('hidden', !dailyMode);
+  document.getElementById('groupWrap').classList.toggle('hidden', !dailyMode);
   if (dailyMode) {
     document.getElementById('dateFilterWrap').style.display = 'flex';
+    document.getElementById('groupWrap').style.display = 'flex';
     const dfEl = document.getElementById('dateFrom');
     const dtEl = document.getElementById('dateTo');
     if (allDates.length) {
@@ -758,6 +813,15 @@ document.getElementById('dateTo').onchange   = e => { dateTo   = e.target.value;
 document.getElementById('dateReset').onclick = () => {
   if (allDates.length) { dateFrom = allDates[0]; dateTo = allDates[allDates.length - 1]; render(); }
 };
+document.querySelectorAll('.chip[data-time]').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('.chip[data-time]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    timeGroup = chip.getAttribute('data-time');
+    expanded.clear();
+    render();
+  };
+});
 window.addEventListener('resize', () => { if (dailyMode) renderDailyChart(); });
 
 /* ============ Export ============ */
