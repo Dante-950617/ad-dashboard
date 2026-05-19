@@ -138,6 +138,86 @@
     justify-content: flex-end; margin-bottom: 8px;
   }
   .chart-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 2px; margin-bottom: 16px;
+    background: #fff; border-radius: 10px; padding: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); width: fit-content;
+  }
+  .tab {
+    padding: 8px 18px; border: none; background: transparent;
+    border-radius: 8px; cursor: pointer; font-size: 13px;
+    font-weight: 500; color: #6b7280; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .tab:hover { background: #f3f4f6; color: #1f2330; }
+  .tab.active { background: #1f2330; color: #fff; }
+  /* Insight box */
+  .insight-box {
+    background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+    border-left: 4px solid #4f46e5;
+    padding: 16px 20px; border-radius: 10px; margin-bottom: 16px;
+  }
+  .insight-box h3 { font-size: 14px; margin-bottom: 10px; color: #312e81; }
+  .insight-list { display: flex; flex-direction: column; gap: 8px; padding: 0; }
+  .insight-list li {
+    list-style: none; font-size: 13px; color: #1f2330; line-height: 1.5;
+    padding: 8px 12px; background: rgba(255,255,255,0.7); border-radius: 6px;
+  }
+  /* Comparison rows */
+  .comp-row {
+    display: grid; grid-template-columns: 130px 1fr 70px;
+    gap: 10px; align-items: center; padding: 5px 0; font-size: 12px;
+  }
+  .comp-label { color: #4b5563; font-weight: 500; }
+  .comp-bar-wrap { background: #f3f4f6; height: 18px; border-radius: 3px; overflow: hidden; }
+  .comp-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .comp-value { text-align: right; font-weight: 600; color: #1f2330; }
+  /* Weekday heatmap */
+  .weekday-grid {
+    display: grid; grid-template-columns: 70px repeat(7, 1fr);
+    gap: 4px; font-size: 11px;
+  }
+  .weekday-grid .row-label {
+    color: #6b7280; font-weight: 500; align-self: center;
+    text-align: right; padding-right: 8px;
+  }
+  .weekday-grid .day-label {
+    text-align: center; color: #6b7280; font-weight: 500; padding: 6px 0;
+  }
+  .weekday-grid .cell {
+    text-align: center; padding: 10px 0; border-radius: 4px;
+    font-weight: 600; color: #1f2330; cursor: help;
+  }
+  /* Ranking cards */
+  .rank-list { display: flex; flex-direction: column; gap: 6px; }
+  .rank-card {
+    display: grid; grid-template-columns: 28px 1fr auto;
+    gap: 10px; padding: 9px 12px; background: #fff;
+    border: 1px solid #e5e7eb; border-radius: 8px; align-items: center;
+  }
+  .rank-card:hover { border-color: #4f46e5; }
+  .rank-num { font-size: 16px; font-weight: 700; color: #9ca3af; text-align: center; }
+  .rank-card.top1 .rank-num { color: #f59e0b; }
+  .rank-card.top2 .rank-num { color: #9ca3af; }
+  .rank-card.top3 .rank-num { color: #d97706; }
+  .rank-name { font-weight: 500; color: #1f2330; margin-bottom: 3px; font-size: 12.5px; word-break: break-all; }
+  .rank-meta { color: #6b7280; font-size: 10.5px; }
+  .rank-stats { text-align: right; }
+  .rank-stats .roas-big { font-size: 15px; font-weight: 700; }
+  .rank-stats .sub { font-size: 10px; color: #9ca3af; }
+  /* Matrix table */
+  .matrix-table { font-size: 11.5px; width: 100%; border-collapse: separate; border-spacing: 3px; }
+  .matrix-table th { background: #f8f9fb; padding: 6px 8px; text-align: center; font-weight: 600; color: #4b5563; }
+  .matrix-table th.text { text-align: left; }
+  .matrix-table td { padding: 0; }
+  .matrix-table td.text { padding: 4px 8px; max-width: 220px; word-break: break-all; }
+  .matrix-cell { text-align: center; padding: 8px 4px; border-radius: 4px; font-weight: 600; cursor: help; }
+  /* Two-column grid */
+  .tab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 900px) { .tab-grid { grid-template-columns: 1fr; } }
+  .card h3 { font-size: 14px; margin-bottom: 12px; color: #374151; font-weight: 600; }
+  .card h3 .hint { font-size: 11px; color: #9ca3af; font-weight: 400; margin-left: 6px; }
   .hidden { display: none; }
   .empty-state {
     text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px;
@@ -166,6 +246,12 @@
 </div>
 
 <div id="dashboard" class="hidden">
+  <nav class="tabs">
+    <button class="tab active" data-tab="pivot">📊 캠페인 피벗</button>
+    <button class="tab" data-tab="creative">🎨 소재 분석</button>
+  </nav>
+
+  <section id="tab-pivot">
   <div class="summary" id="summary"></div>
 
   <div id="notice" class="notice hidden">
@@ -231,6 +317,46 @@
       기준: Meta Blueprint · WordStream 2024 e-commerce 벤치마크 · AdEspresso 빈도 가이드 (BEP ROAS 2.0x / 양호 3.0x / 평균 CTR 1% / 양호 CTR 2% / 피로 빈도 3.5 / e-com 평균 CVR 1~3%)
     </div>
   </div>
+  </section>
+
+  <section id="tab-creative" class="hidden">
+    <div class="summary" id="creative-summary"></div>
+    <div class="card insight-box hidden" id="insight-box">
+      <h3>📌 자동 인사이트</h3>
+      <ul class="insight-list" id="insight-list"></ul>
+    </div>
+    <div class="tab-grid">
+      <div class="card">
+        <h3>🎨 소재 유형별 ROAS <span class="hint">막대 색: 녹색 ≥3x / 주황 ≥2x / 빨강 &lt;2x</span></h3>
+        <div id="type-bars"></div>
+      </div>
+      <div class="card">
+        <h3>💰 유형별 지출 비중</h3>
+        <div id="type-share"></div>
+      </div>
+    </div>
+    <div class="card hidden" id="weekday-card">
+      <h3>📅 요일별 성과 히트맵 <span class="hint">색이 진할수록 높음 · 일별 CSV에서만 활성</span></h3>
+      <div class="weekday-grid" id="weekday-grid"></div>
+    </div>
+    <div class="tab-grid">
+      <div class="card">
+        <h3>🏆 Top 10 소재 <span class="hint">ROAS 기준, 지출 ≥1만원만</span></h3>
+        <div class="rank-list" id="top-creatives"></div>
+      </div>
+      <div class="card">
+        <h3>⚠️ Bottom 10 소재 <span class="hint">개선/중단 검토 대상</span></h3>
+        <div class="rank-list" id="bottom-creatives"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🧭 캠페인 × 소재 유형 매트릭스 <span class="hint">셀 = ROAS · 마우스오버 시 상세</span></h3>
+      <div class="table-wrap">
+        <table class="matrix-table" id="matrix-table"></table>
+      </div>
+    </div>
+    <div class="footer-note">소재 분석은 상단 캠페인 피벗 탭에서 설정한 필터(상태/기간/최소지출)를 그대로 적용합니다.</div>
+  </section>
 </div>
 
 <script>
@@ -612,6 +738,268 @@ function renderSummary(tree) {
   ).join('');
 }
 
+/* ============ Creative tab helpers & renderers ============ */
+function matchesFilter(r) {
+  if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+  if (r.spend < minSpend) return false;
+  if (dailyMode && r.date) {
+    if (dateFrom && r.date < dateFrom) return false;
+    if (dateTo && r.date > dateTo) return false;
+  }
+  return true;
+}
+function aggregateBy(keyFn) {
+  const out = {};
+  for (const r of rawRows) {
+    if (!matchesFilter(r)) continue;
+    const k = keyFn(r);
+    if (k === null || k === undefined || k === '') continue;
+    if (!out[k]) out[k] = emptyAgg();
+    addRow(out[k], r);
+  }
+  return out;
+}
+function getWeekday(dateStr) {
+  if (!dateStr) return null;
+  return new Date(dateStr + 'T00:00:00').getDay();
+}
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const TYPE_COLORS = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#9ca3af'];
+
+function renderCreativeSummary() {
+  const filtered = rawRows.filter(matchesFilter);
+  const creativeSet = new Set(filtered.map(r => r.ad));
+  const totalSpend   = filtered.reduce((s, r) => s + r.spend, 0);
+  const totalRevenue = filtered.reduce((s, r) => s + r.revenue, 0);
+  const totalResults = filtered.reduce((s, r) => s + r.results, 0);
+  const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+  const byCreative = aggregateBy(r => r.ad);
+  const creatives = Object.entries(byCreative).map(([n, a]) => ({ name: n, ...derive(a) })).filter(c => c.spend >= 30000);
+  creatives.sort((a, b) => b.roas - a.roas);
+  const best  = creatives[0];
+  const worst = creatives.filter(c => c.roas > 0).slice(-1)[0];
+  const cards = [
+    { label: '활성 소재 수', value: creativeSet.size + '개' },
+    { label: '평균 ROAS', value: roas > 0 ? roas.toFixed(2) + 'x' : '-' },
+    { label: '총 구매', value: totalResults + '건' },
+    { label: '총 지출', value: '₩' + fmtKRW(totalSpend) },
+    { label: '베스트 소재', value: best ? (best.name.length > 22 ? best.name.slice(0, 22) + '…' : best.name) : '-',
+      sub: best ? `ROAS ${best.roas.toFixed(2)}x · 지출 ₩${fmtKRW(best.spend)}` : '' },
+    { label: '워스트 소재 (지출≥3만)', value: worst ? (worst.name.length > 22 ? worst.name.slice(0, 22) + '…' : worst.name) : '-',
+      sub: worst ? `ROAS ${worst.roas.toFixed(2)}x · 지출 ₩${fmtKRW(worst.spend)}` : '' }
+  ];
+  document.getElementById('creative-summary').innerHTML = cards.map(c =>
+    `<div class="stat"><div class="label">${c.label}</div><div class="value" style="font-size:${c.value.length > 15 ? '13px' : '20px'}">${escapeHtml(c.value)}</div>${c.sub ? `<div class="sub">${escapeHtml(c.sub)}</div>` : ''}</div>`
+  ).join('');
+}
+
+function renderTypeBars() {
+  const byType = aggregateBy(r => r.type);
+  const types = Object.entries(byType).map(([n, a]) => ({ name: n, ...derive(a) }));
+  const el = document.getElementById('type-bars');
+  if (!types.length) { el.innerHTML = '<div class="empty-state">데이터 없음</div>'; return; }
+  types.sort((a, b) => b.roas - a.roas);
+  const maxRoas = Math.max(...types.map(t => t.roas), 1);
+  el.innerHTML = types.map(t => {
+    const pct = Math.max(2, (t.roas / maxRoas) * 100);
+    const color = t.roas >= 3 ? '#059669' : t.roas >= 2 ? '#d97706' : '#dc2626';
+    return `<div class="comp-row">
+      <div class="comp-label">${escapeHtml(t.name)}</div>
+      <div class="comp-bar-wrap" title="지출 ₩${fmtKRW(t.spend)} / 구매 ${t.results}건 / CTR ${isFinite(t.ctr) ? t.ctr.toFixed(2) + '%' : '-'}">
+        <div class="comp-bar" style="width:${pct}%; background:${color}"></div>
+      </div>
+      <div class="comp-value">${t.roas > 0 ? t.roas.toFixed(2) + 'x' : '-'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTypeShare() {
+  const byType = aggregateBy(r => r.type);
+  const total = Object.values(byType).reduce((s, a) => s + a.spend, 0);
+  const el = document.getElementById('type-share');
+  if (total === 0) { el.innerHTML = '<div class="empty-state">데이터 없음</div>'; return; }
+  const types = Object.entries(byType).map(([n, a]) => ({ name: n, spend: a.spend, share: a.spend / total * 100 }));
+  types.sort((a, b) => b.spend - a.spend);
+  el.innerHTML = types.map((t, i) => `
+    <div class="comp-row">
+      <div class="comp-label">${escapeHtml(t.name)}</div>
+      <div class="comp-bar-wrap" title="₩${fmtKRW(t.spend)}">
+        <div class="comp-bar" style="width:${Math.max(2, t.share)}%; background:${TYPE_COLORS[i % TYPE_COLORS.length]}"></div>
+      </div>
+      <div class="comp-value">${t.share.toFixed(1)}%</div>
+    </div>`).join('');
+}
+
+function renderWeekday() {
+  const card = document.getElementById('weekday-card');
+  if (!dailyMode) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const byDay = aggregateBy(r => r.date ? getWeekday(r.date) : null);
+  const metrics = [
+    { key: 'roas',  label: 'ROAS',  fmt: v => v.toFixed(2) + 'x' },
+    { key: 'ctr',   label: 'CTR',   fmt: v => v.toFixed(2) + '%' },
+    { key: 'spend', label: '지출', fmt: v => '₩' + fmtKRW(v) }
+  ];
+  let html = '<div class="row-label"></div>';
+  for (let i = 1; i <= 7; i++) html += `<div class="day-label">${WEEKDAYS[i % 7]}</div>`;
+  for (const m of metrics) {
+    const values = [];
+    for (let i = 1; i <= 7; i++) {
+      const a = byDay[i % 7];
+      values.push(a ? derive(a)[m.key] : 0);
+    }
+    const valid = values.filter(v => isFinite(v) && v > 0);
+    const max = valid.length ? Math.max(...valid) : 1;
+    const min = valid.length ? Math.min(...valid) : 0;
+    html += `<div class="row-label">${m.label}</div>`;
+    for (let i = 0; i < 7; i++) {
+      const v = values[i];
+      const ratio = (max > min) ? (v - min) / (max - min) : (v > 0 ? 1 : 0);
+      const bg = v > 0 ? `hsl(${120 - (1 - ratio) * 80}, 55%, ${88 - ratio * 18}%)` : '#f9fafb';
+      const day = WEEKDAYS[(i + 1) % 7];
+      html += `<div class="cell" style="background:${bg}" title="${day}요일 ${m.label}: ${v > 0 ? m.fmt(v) : '데이터 없음'}">${v > 0 ? m.fmt(v) : '-'}</div>`;
+    }
+  }
+  document.getElementById('weekday-grid').innerHTML = html;
+}
+
+function renderTopBottomCreatives() {
+  const byCreative = aggregateBy(r => r.ad);
+  const list = Object.entries(byCreative).map(([n, a]) => {
+    const d = derive(a);
+    const sample = rawRows.find(r => r.ad === n);
+    return { name: n, type: sample?.type || '기타', status: sample?.status || '', ...d };
+  }).filter(c => c.spend >= 10000);
+  const top = [...list].filter(c => c.roas > 0).sort((a, b) => b.roas - a.roas).slice(0, 10);
+  const bottom = [...list].sort((a, b) => (a.roas || 0) - (b.roas || 0)).slice(0, 10);
+  function card(c, i) {
+    const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+    return `<div class="rank-card ${rankClass}">
+      <div class="rank-num">${i + 1}</div>
+      <div>
+        <div class="rank-name">${escapeHtml(c.name)}</div>
+        <div class="rank-meta">
+          <span class="badge-type">${escapeHtml(c.type)}</span>
+          지출 ₩${fmtKRW(c.spend)} · 구매 ${c.results}건 · CTR ${isFinite(c.ctr) ? c.ctr.toFixed(2) + '%' : '-'}
+        </div>
+      </div>
+      <div class="rank-stats">
+        <div class="roas-big ${roasClass(c.roas)}">${c.roas > 0 ? c.roas.toFixed(2) + 'x' : '0x'}</div>
+        <div class="sub">ROAS</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('top-creatives').innerHTML = top.length ? top.map(card).join('') : '<div class="empty-state">데이터 부족</div>';
+  document.getElementById('bottom-creatives').innerHTML = bottom.length ? bottom.map(card).join('') : '<div class="empty-state">데이터 부족</div>';
+}
+
+function renderMatrix() {
+  const filtered = rawRows.filter(matchesFilter);
+  const cellAgg = {};
+  const campaignTotals = {};
+  for (const r of filtered) {
+    const k = r.campaign + '|||' + r.type;
+    if (!cellAgg[k]) cellAgg[k] = emptyAgg();
+    addRow(cellAgg[k], r);
+    if (!campaignTotals[r.campaign]) campaignTotals[r.campaign] = 0;
+    campaignTotals[r.campaign] += r.spend;
+  }
+  const campaigns = Object.entries(campaignTotals).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  const types = [...new Set(filtered.map(r => r.type))];
+  let html = '<thead><tr><th class="text">캠페인</th>';
+  for (const t of types) html += `<th><span class="badge-type">${escapeHtml(t)}</span></th>`;
+  html += '</tr></thead><tbody>';
+  for (const c of campaigns) {
+    html += `<tr><td class="text"><strong>${escapeHtml(c)}</strong></td>`;
+    for (const t of types) {
+      const agg = cellAgg[c + '|||' + t];
+      if (agg && agg.spend > 0) {
+        const d = derive(agg);
+        const style = d.roas >= 3 ? 'background:#d1fae5; color:#047857'
+                    : d.roas >= 2 ? 'background:#fef3c7; color:#b45309'
+                    : d.roas > 0  ? 'background:#fee2e2; color:#b91c1c'
+                                  : 'background:#f3f4f6; color:#9ca3af';
+        html += `<td><div class="matrix-cell" style="${style}" title="지출 ₩${fmtKRW(d.spend)} · 구매 ${d.results}건 · CTR ${isFinite(d.ctr) ? d.ctr.toFixed(2) + '%' : '-'}">${d.roas > 0 ? d.roas.toFixed(2) + 'x' : '0x'}</div></td>`;
+      } else {
+        html += '<td><div class="matrix-cell" style="background:#fafafa; color:#d1d5db">·</div></td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  document.getElementById('matrix-table').innerHTML = html;
+}
+
+function renderInsights() {
+  const insights = [];
+  const byType = aggregateBy(r => r.type);
+  const types = Object.entries(byType).map(([n, a]) => ({ name: n, spend: a.spend, ...derive(a) }));
+  const sigTypes = types.filter(t => t.spend >= 100000);
+  if (sigTypes.length > 0) {
+    const sorted = [...sigTypes].sort((a, b) => b.roas - a.roas);
+    const best = sorted[0], worst = sorted[sorted.length - 1];
+    if (best.roas > 0) {
+      insights.push(`🥇 <strong>${escapeHtml(best.name)}</strong> 유형이 ROAS <strong>${best.roas.toFixed(2)}x</strong>로 최고 (지출 ₩${fmtKRW(best.spend)} · 구매 ${best.results}건)`);
+    }
+    if (sigTypes.length > 1 && worst.roas < 2 && worst.name !== best.name) {
+      insights.push(`⚠️ <strong>${escapeHtml(worst.name)}</strong> 유형은 ROAS <strong>${worst.roas.toFixed(2)}x</strong>로 손익분기(2.0x) 미달 — 소재 교체 또는 비중 축소 검토`);
+    }
+    const total = types.reduce((s, t) => s + t.spend, 0);
+    const topShare = total > 0 ? (best.spend / total * 100) : 0;
+    if (topShare > 50) {
+      insights.push(`💰 지출의 <strong>${topShare.toFixed(0)}%</strong>가 <strong>${escapeHtml(best.name)}</strong>에 집중 — 잘 도는 만큼 좋지만 단일 유형 의존 리스크. 변주/확장 컨셉 준비 권장`);
+    }
+  }
+  if (dailyMode) {
+    const byDay = aggregateBy(r => r.date ? getWeekday(r.date) : null);
+    const wdays = Object.entries(byDay).map(([k, a]) => ({ day: WEEKDAYS[+k], spend: a.spend, ...derive(a) })).filter(d => d.spend > 0 && d.roas > 0);
+    if (wdays.length >= 3) {
+      wdays.sort((a, b) => b.roas - a.roas);
+      const bestD = wdays[0], worstD = wdays[wdays.length - 1];
+      const ratio = bestD.roas / worstD.roas;
+      if (ratio >= 1.3) {
+        insights.push(`📅 <strong>${bestD.day}요일</strong> ROAS <strong>${bestD.roas.toFixed(2)}x</strong> vs <strong>${worstD.day}요일</strong> <strong>${worstD.roas.toFixed(2)}x</strong> (${ratio.toFixed(1)}배 차이) — 요일별 예산 가중 또는 광고 게재 스케줄 조정 고려`);
+      }
+    }
+  }
+  const byCreative = aggregateBy(r => r.ad);
+  const creatives = Object.entries(byCreative).map(([n, a]) => {
+    const sample = rawRows.find(r => r.ad === n);
+    return { name: n, type: sample?.type || '기타', ...derive(a) };
+  }).filter(c => c.spend >= 50000);
+  if (creatives.length > 0) {
+    creatives.sort((a, b) => b.roas - a.roas);
+    const topC = creatives[0];
+    if (topC.roas >= 3) {
+      insights.push(`🏆 최고 성과 소재: <strong>${escapeHtml(topC.name)}</strong> (${escapeHtml(topC.type)} · ROAS <strong>${topC.roas.toFixed(2)}x</strong>) — 동일 컨셉 변주(헤드라인/CTA/모델) 확장 추천`);
+    }
+  }
+  const allF = rawRows.filter(matchesFilter);
+  const tImpr = allF.reduce((s, r) => s + r.impr, 0);
+  const tClicks = allF.reduce((s, r) => s + r.clicks, 0);
+  const tResults = allF.reduce((s, r) => s + r.results, 0);
+  const avgCtr = tImpr > 0 ? tClicks / tImpr * 100 : 0;
+  const avgCvr = tClicks > 0 ? tResults / tClicks * 100 : 0;
+  if (avgCtr >= 2 && avgCvr < 1 && tResults > 0) {
+    insights.push(`👀 전체 CTR <strong>${avgCtr.toFixed(2)}%</strong> (양호) vs CVR <strong>${avgCvr.toFixed(2)}%</strong> (e-com 평균 1~3% 미달) — 클릭은 끌지만 전환이 약함, 랜딩페이지 또는 타겟팅 점검 필요`);
+    }
+  const box = document.getElementById('insight-box');
+  const ul = document.getElementById('insight-list');
+  if (!insights.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  ul.innerHTML = insights.map(i => `<li>${i}</li>`).join('');
+}
+
+function renderCreativeTab() {
+  renderCreativeSummary();
+  renderInsights();
+  renderTypeBars();
+  renderTypeShare();
+  renderWeekday();
+  renderTopBottomCreatives();
+  renderMatrix();
+}
+
 function renderDailyChart() {
   const svg = document.getElementById('chartSvg');
   const tip = document.getElementById('chartTip');
@@ -718,6 +1106,7 @@ function render() {
   renderTree(pivotTree, 0, '', out);
   document.getElementById('body').innerHTML = out.join('') || '<tr><td colspan="11" class="empty-state">조건에 맞는 데이터 없음</td></tr>';
   if (dailyMode) renderDailyChart();
+  if (rawRows.length) renderCreativeTab();
   // Wire toggle clicks
   document.querySelectorAll('.toggle[data-path]').forEach(el => {
     el.onclick = (e) => {
@@ -823,6 +1212,16 @@ document.querySelectorAll('.chip[data-time]').forEach(chip => {
   };
 });
 window.addEventListener('resize', () => { if (dailyMode) renderDailyChart(); });
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const which = tab.getAttribute('data-tab');
+    document.getElementById('tab-pivot').classList.toggle('hidden', which !== 'pivot');
+    document.getElementById('tab-creative').classList.toggle('hidden', which !== 'creative');
+    if (which === 'creative' && rawRows.length) renderCreativeTab();
+  };
+});
 
 /* ============ Export ============ */
 document.getElementById('exportBtn').onclick = () => {
