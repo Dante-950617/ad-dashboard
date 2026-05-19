@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>광고 성과 대시보드 (Meta 광고관리자 CSV)</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", Roboto, sans-serif;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "tnum" 1;
     background: #f5f6f8; color: #1f2330; padding: 24px; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  h1 { font-size: 22px; margin-bottom: 4px; }
+  h1 { font-size: 22px; margin-bottom: 4px; font-weight: 600; letter-spacing: -0.01em; }
+  h3 { font-weight: 500; letter-spacing: -0.005em; }
+  strong { font-weight: 500; }
   .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 20px; }
   .card {
     background: #fff; border-radius: 12px; padding: 18px;
@@ -30,7 +36,7 @@
   .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .stat { background: #fff; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
   .stat .label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-  .stat .value { font-size: 20px; font-weight: 600; color: #1f2330; }
+  .stat .value { font-size: 20px; font-weight: 500; color: #1f2330; }
   .stat .sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
   /* Filter bar */
   .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
@@ -48,14 +54,14 @@
   th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid #eef0f3; white-space: nowrap; }
   th.text, td.text { text-align: left; }
   thead th {
-    background: #f8f9fb; font-weight: 600; color: #4b5563;
+    background: #f8f9fb; font-weight: 500; color: #4b5563;
     cursor: pointer; user-select: none; position: sticky; top: 0; z-index: 1;
   }
   thead th:hover { background: #eef2ff; }
   thead th .arrow { color: #9ca3af; font-size: 10px; margin-left: 3px; }
   tbody tr:hover { background: #fafbfc; }
   /* Hierarchy */
-  .row-campaign { background: #f0f4ff; font-weight: 600; }
+  .row-campaign { background: #f0f4ff; font-weight: 500; }
   .row-campaign:hover { background: #e6edff; }
   .row-adset { background: #f8faff; font-weight: 500; }
   .row-adset:hover { background: #f0f4ff; }
@@ -63,7 +69,7 @@
   .row-type { background: #fcfdff; color: #6b7280; font-size: 11.5px; }
   .row-time {
     background: linear-gradient(90deg, #e0e7ff 0%, #ede9fe 100%);
-    color: #1e1b4b; font-weight: 700;
+    color: #1e1b4b; font-weight: 500;
     border-top: 2px solid #c7d2fe;
   }
   .row-time:hover { background: linear-gradient(90deg, #c7d2fe 0%, #ddd6fe 100%); }
@@ -78,12 +84,12 @@
   .indent-2 { padding-left: 44px; }
   .indent-3 { padding-left: 68px; }
   /* Performance badges */
-  .roas-good { color: #059669; font-weight: 600; }
+  .roas-good { color: #059669; font-weight: 500; }
   .roas-mid { color: #d97706; }
   .roas-bad { color: #dc2626; }
   .badge {
     display: inline-block; padding: 1px 6px; border-radius: 4px;
-    font-size: 10px; font-weight: 600; margin-left: 4px;
+    font-size: 10px; font-weight: 500; margin-left: 4px;
   }
   .badge-active { background: #d1fae5; color: #047857; }
   .badge-inactive { background: #fee2e2; color: #b91c1c; }
@@ -176,7 +182,7 @@
   .comp-label { color: #4b5563; font-weight: 500; }
   .comp-bar-wrap { background: #f3f4f6; height: 18px; border-radius: 3px; overflow: hidden; }
   .comp-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
-  .comp-value { text-align: right; font-weight: 600; color: #1f2330; }
+  .comp-value { text-align: right; font-weight: 500; color: #1f2330; }
   /* Weekday heatmap */
   .weekday-grid {
     display: grid; grid-template-columns: 70px repeat(7, 1fr);
@@ -191,7 +197,7 @@
   }
   .weekday-grid .cell {
     text-align: center; padding: 10px 0; border-radius: 4px;
-    font-weight: 600; color: #1f2330; cursor: help;
+    font-weight: 500; color: #1f2330; cursor: help;
   }
   /* Ranking cards */
   .rank-list { display: flex; flex-direction: column; gap: 6px; }
@@ -201,26 +207,26 @@
     border: 1px solid #e5e7eb; border-radius: 8px; align-items: center;
   }
   .rank-card:hover { border-color: #4f46e5; }
-  .rank-num { font-size: 16px; font-weight: 700; color: #9ca3af; text-align: center; }
+  .rank-num { font-size: 16px; font-weight: 500; color: #9ca3af; text-align: center; }
   .rank-card.top1 .rank-num { color: #f59e0b; }
   .rank-card.top2 .rank-num { color: #9ca3af; }
   .rank-card.top3 .rank-num { color: #d97706; }
   .rank-name { font-weight: 500; color: #1f2330; margin-bottom: 3px; font-size: 12.5px; word-break: break-all; }
   .rank-meta { color: #6b7280; font-size: 10.5px; }
   .rank-stats { text-align: right; }
-  .rank-stats .roas-big { font-size: 15px; font-weight: 700; }
+  .rank-stats .roas-big { font-size: 15px; font-weight: 500; }
   .rank-stats .sub { font-size: 10px; color: #9ca3af; }
   /* Matrix table */
   .matrix-table { font-size: 11.5px; width: 100%; border-collapse: separate; border-spacing: 3px; }
-  .matrix-table th { background: #f8f9fb; padding: 6px 8px; text-align: center; font-weight: 600; color: #4b5563; }
+  .matrix-table th { background: #f8f9fb; padding: 6px 8px; text-align: center; font-weight: 500; color: #4b5563; }
   .matrix-table th.text { text-align: left; }
   .matrix-table td { padding: 0; }
   .matrix-table td.text { padding: 4px 8px; max-width: 220px; word-break: break-all; }
-  .matrix-cell { text-align: center; padding: 8px 4px; border-radius: 4px; font-weight: 600; cursor: help; }
+  .matrix-cell { text-align: center; padding: 8px 4px; border-radius: 4px; font-weight: 500; cursor: help; }
   /* Two-column grid */
   .tab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   @media (max-width: 900px) { .tab-grid { grid-template-columns: 1fr; } }
-  .card h3 { font-size: 14px; margin-bottom: 12px; color: #374151; font-weight: 600; }
+  .card h3 { font-size: 14px; margin-bottom: 12px; color: #374151; font-weight: 500; }
   .card h3 .hint { font-size: 11px; color: #9ca3af; font-weight: 400; margin-left: 6px; }
   .hidden { display: none; }
   .empty-state {
