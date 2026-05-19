@@ -61,10 +61,14 @@
   .row-adset:hover { background: #f0f4ff; }
   .row-creative { background: #fff; }
   .row-type { background: #fcfdff; color: #6b7280; font-size: 11.5px; }
-  .row-time { background: #1f2330; color: #fff; font-weight: 700; }
-  .row-time:hover { background: #374151; }
-  .row-time .toggle { color: #d1d5db; }
-  .row-time td { border-color: #374151; }
+  .row-time {
+    background: linear-gradient(90deg, #e0e7ff 0%, #ede9fe 100%);
+    color: #1e1b4b; font-weight: 700;
+    border-top: 2px solid #c7d2fe;
+  }
+  .row-time:hover { background: linear-gradient(90deg, #c7d2fe 0%, #ddd6fe 100%); }
+  .row-time .toggle { color: #4f46e5; }
+  .row-time td { border-bottom-color: #c7d2fe; }
   .toggle {
     display: inline-block; width: 16px; text-align: center; cursor: pointer;
     color: #6b7280; user-select: none; font-size: 10px;
